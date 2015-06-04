@@ -52,7 +52,8 @@ def GenerateAcceleratedSamplingPattern(dataShape, acc, ref=0, sshift=0):
 
     return imBim
     
-def ExtractCalData(data, samplingPattern):
+def ExtractCalData(data, samplingPattern=None, maxReadoutWidth=-1):
+    import scipy.ndimage.morphology
     """Extract region of calibration data from an internally calibrated data set.
 
     Parameters
@@ -63,6 +64,7 @@ def ExtractCalData(data, samplingPattern):
         sampling pattern mask.
         0 = not acquired
         >0 = acquired
+        if None, uses np.max(np.abs(data))
 
     Returns
     -------
@@ -79,13 +81,22 @@ def ExtractCalData(data, samplingPattern):
         
     Philip J. Beatty (philip.beatty@gmail.com)
     """
+    if samplingPattern is None:
+        samplingPattern = np.max(np.abs(data), 2)
     ky_projection = np.max(samplingPattern, axis=0)
     kx_projection = np.max(samplingPattern, axis=1)
     
-    cal_indx = np.nonzero(kx_projection > 1)
-    cal_indy = np.nonzero(ky_projection > 1)
+    ky_contiguous = scipy.ndimage.morphology.binary_opening(ky_projection, structure=np.ones((3,)))    
+    kx_contiguous = scipy.ndimage.morphology.binary_opening(kx_projection, structure=np.ones((3,)))    
+    
+    cal_indx = np.nonzero(kx_contiguous)
+    cal_indy = np.nonzero(ky_contiguous)
 
     kx_cal_bounds = np.arange(np.min(cal_indx), np.max(cal_indx)+1)
+    if maxReadoutWidth > 0:
+        kx_cal_bounds = np.arange((samplingPattern.shape[0]-maxReadoutWidth)/2, (samplingPattern.shape[0]+maxReadoutWidth)/2)
+    
+    
     ky_cal_bounds = np.arange(np.min(cal_indy), np.max(cal_indy)+1)
     channelBounds = np.arange(0, data.shape[2])
     

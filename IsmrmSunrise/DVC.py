@@ -202,7 +202,7 @@ def ComputeCcmDvc(im, kernelSize=None, kernelOversampling=None, ccmShape=None):
 
     vcIm = np.exp(1j*StitchVcBlocks(eigBlocks, synthesisOverlap)) * vcImMag
 
-    imshow2d([vcIm, vcImMag], windowTitle="vcIm", titles=["vcIm", "vcImMag"])
+    #imshow2d([vcIm, vcImMag], windowTitle="vcIm", titles=["vcIm", "vcImMag"])
 
     kernels = ComputeDvcKernels(im, vcIm, kernelSize, kernelOversampling)
 

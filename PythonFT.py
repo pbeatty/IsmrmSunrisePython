@@ -95,19 +95,13 @@ def RunPythonFTShift(output, input, dim, transformDirection, scale, fftExtent, p
     ftExtent = list(inputExtent)
     ftExtent[dim] = max(inputExtent[dim], outputExtent[dim], fftExtent)
 
-    inputIndices = []
-    for currExtent in inputExtent:
-        inputIndices.append(slice(0, currExtent))    
-    #inputIndices = (slice(0,inputExtent[0]), slice(0,inputExtent[1]))
-    
-    outputIndices = []
-    for currExtent in outputExtent:
-        outputIndices.append(slice(0, currExtent))
-    #outputIndices = (slice(0, outputExtent[0]), slice(0, outputExtent[1]))
+    inputIndices = tuple(map(lambda extent: slice(0, extent), inputExtent))
+
+    outputIndices = tuple(map(lambda extent: slice(0, extent), outputExtent))
 
     tileExtent = np.array(inputExtent)
     tileExtent[dim] = 1
-    reshapeExtent = np.ones(input.ndim)
+    reshapeExtent = np.ones(input.ndim, dtype='i')
     reshapeExtent[dim] = inputExtent[dim]
 
     if transformDirection == TransformDirection.FORWARD:
@@ -119,7 +113,8 @@ def RunPythonFTShift(output, input, dim, transformDirection, scale, fftExtent, p
     shiftPhasor = np.reshape(np.exp((twiddleCoefficient*X*postShift) / ftExtent[dim]), reshapeExtent)
     shiftMatrix = np.tile(shiftPhasor, tileExtent)    
         
-    tempIn = np.zeros(ftExtent, np.complex64)        
+    tempIn = np.zeros(ftExtent, np.complex64)
+    
     tempIn[inputIndices] = input * shiftMatrix
 
     reshapeExtent[dim] = outputExtent[dim]

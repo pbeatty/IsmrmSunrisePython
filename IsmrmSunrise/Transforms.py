@@ -68,7 +68,7 @@ def FlipDim(a, dim=0):
     a = np.asanyarray(a)
     idx = [slice(None)]*len(a.shape)
     idx[dim] = slice(None, None, -1)
-    return a[idx]
+    return a[tuple(idx)]
 
 def TransformImageToKspace(im, dim=None, kShape=None, scale=None, fftExtent=None, preShift=None, postShift=None):
     """Fourier transform from image space to k-space space along a given or all 

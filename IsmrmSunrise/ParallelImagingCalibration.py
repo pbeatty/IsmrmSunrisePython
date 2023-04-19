@@ -36,12 +36,12 @@ def ComputeJerModelDriven(csm, kernelShape):
         
     Philip J. Beatty (philip.beatty@gmail.com)
     """
-    import Transforms
+    from . import Transforms
     
     channelDim = csm.ndim-1
     numChannels = csm.shape[channelDim]
 
-    jerLookup = np.zeros(kernelShape + kernelShape + [numChannels, numChannels], dtype=np.complex)
+    jerLookup = np.zeros(kernelShape + kernelShape + [numChannels, numChannels], dtype=complex)
 
     nx = csm.shape[0]
     ny = csm.shape[1]
@@ -102,7 +102,7 @@ def ComputeJerDataDrivenReference(calData, kernelShape):
 
     nfitx = calData.shape[0] - wx
     nfity = calData.shape[1] - wy
-    jerLookup = np.zeros(kernelShape + kernelShape + [nc, nc], dtype=np.complex)
+    jerLookup = np.zeros(kernelShape + kernelShape + [nc, nc], dtype=complex)
 
     xInd = np.arange(0, nfitx)
     yInd = np.arange(0, nfity)
@@ -161,7 +161,7 @@ def ComputeJerDataDriven(calData, kernelShape):
     nc = calData.shape[2]
     calShape = calData.shape[0:2]
     
-    jerLookup = np.zeros(kernelShape + kernelShape + [nc, nc], dtype=np.complex)
+    jerLookup = np.zeros(kernelShape + kernelShape + [nc, nc], dtype=complex)
 
 
     for dky in range(-(kernelShape[1]-1), kernelShape[1]):
@@ -233,7 +233,7 @@ def ComputePartialSums(calData, kernelShape, delta):
     ky_a_min = max(0, -delta[1])
     
     nc = calData.shape[calData.ndim-1]
-    partialSums = np.zeros([nGroups[0], nGroups[1], nc, nc], dtype=np.complex)
+    partialSums = np.zeros([nGroups[0], nGroups[1], nc, nc], dtype=complex)
     
     xRange_a = kx_a_min + np.arange(0, nData[0])    
     yRange_a = ky_a_min + np.arange(0, nData[1])
@@ -291,7 +291,7 @@ def ComputeSenseUnmixing(accFactor, csm, noiseMatrix=None, regularizationFactor=
     if noiseMatrix is None:
         noiseMatrix = np.eye(numChannels)        
 
-    unmix = np.zeros(csm.shape, dtype=np.complex)
+    unmix = np.zeros(csm.shape, dtype=complex)
 
 
     noiseMatrixInv = np.linalg.pinv(noiseMatrix)
@@ -299,7 +299,7 @@ def ComputeSenseUnmixing(accFactor, csm, noiseMatrix=None, regularizationFactor=
     tic = time.time()
     for xIndex in range(csm.shape[0]): 
         unmix[xIndex,:,:] = ComputeSenseUnmixing1d(accFactor, np.squeeze(csm[xIndex,:,:]), noiseMatrixInv, regularizationFactor) 
-    print 'for loop time %f' %(time.time()-tic)
+    print('for loop time %f' %(time.time()-tic))
 
     return unmix
 
@@ -336,15 +336,15 @@ def ComputeSenseUnmixing1d(accFactor, csm1d, noiseMatrixInv, regularizationFacto
 
     assert numy % accFactor == 0, "ny must be a multiple of acc_factor"
 
-    unmix1d = np.zeros(csm1d.shape, dtype=np.complex)
+    unmix1d = np.zeros(csm1d.shape, dtype=complex)
 
-    numBlocks = numy/accFactor
+    numBlocks = numy//accFactor
     for index in range(numBlocks):
         A = np.mat(csm1d[index::numBlocks,:]).T
         if np.max(np.abs(A)) > 0:  
             #unmix1d(index:n_blocks:ny, :) = pinv(A);
             AHA = A.H * np.mat(noiseMatrixInv) * A
-            reducedEye = np.diag(np.abs(np.diag(AHA))>0).astype(np.int)
+            reducedEye = np.diag(np.abs(np.diag(AHA))>0).astype(int)
             numAlias = np.sum(reducedEye)
             scaledRegFactor = regularizationFactor * np.trace(AHA)/numAlias
         
@@ -398,12 +398,12 @@ def ComputeJerUnmixing(jerLookup, accFactor, ccm, regularizationScale=0.0, verbo
     #
     
     if verbose:
-        print 'Calculating unaliasing kernels...'
+        print('Calculating unaliasing kernels...')
 
     kernelShape = [jerLookup.shape[0], jerLookup.shape[1] ]
     targetLocation = np.right_shift(kernelShape, 1)
     numChannels = ccm.shape[2]
-    kernel = np.zeros( (kernelShape + [numChannels, numChannels]), dtype = np.complex )
+    kernel = np.zeros( (kernelShape + [numChannels, numChannels]), dtype = complex)
 
     for ic in range(numChannels):
         kernel[targetLocation[0], targetLocation[1], ic, ic] = 1
@@ -419,13 +419,13 @@ def ComputeJerUnmixing(jerLookup, accFactor, ccm, regularizationScale=0.0, verbo
     #
 
     if verbose:
-        print 'Merging unaliasing and channel combination images...'
+        print('Merging unaliasing and channel combination images...')
 
 
     unmix = ComputeUnmixingImagesFromKspaceKernels(kernel, ccm)
 
     if verbose:
-        print 'done.'
+        print('done.')
 
     return unmix
 
@@ -454,14 +454,14 @@ def ComputeUnmixingImagesFromKspaceKernels(kernel, ccm):
         
     Philip J. Beatty (philip.beatty@gmail.com)
     """
-    import Transforms
+    from . import Transforms
     nx = ccm.shape[0]
     ny = ccm.shape[1]
     numSourceChannels = kernel.shape[2]
     numTargetChannels = kernel.shape[3]
     assert numTargetChannels == ccm.shape[2], 'numTargetChannels in kernels does not match ccm'
 
-    unmix = np.zeros([nx, ny, numSourceChannels], dtype=np.complex)
+    unmix = np.zeros([nx, ny, numSourceChannels], dtype=complex)
 
     imKernel = Transforms.TransformKernelToImageSpace(kernel, [nx, ny])
 
@@ -507,8 +507,8 @@ def ComputeKspaceUnaliasingCoefficients(jerLookup, kernelMask, regularizationSca
     numSource = kxOffsets.shape[0]
     numChannel = jerLookup.shape[4]
 
-    Rss = np.zeros((numSource, numChannel, numSource, numChannel), dtype=np.complex)
-    Rst = np.zeros((numSource, numChannel, numChannel), dtype=np.complex)
+    Rss = np.zeros((numSource, numChannel, numSource, numChannel), dtype=complex)
+    Rst = np.zeros((numSource, numChannel, numChannel), dtype=complex)
 
 
     for is2 in range(numSource):
@@ -536,7 +536,7 @@ def ComputeKspaceUnaliasingCoefficients(jerLookup, kernelMask, regularizationSca
     weights = np.linalg.solve((Rss + np.eye(numBasis) * (regularizationScale * np.trace(Rss) / numBasis) ), Rst)
     weights = np.reshape(weights, [numSource, numChannel, numChannel], order='F')
 
-    kernel = np.zeros([kernelMask.shape[0], kernelMask.shape[1], numChannel, numChannel], dtype=np.complex)
+    kernel = np.zeros([kernelMask.shape[0], kernelMask.shape[1], numChannel, numChannel], dtype=complex)
     kernel[kxOffsets, kyOffsets, :, :] = weights
     
     return kernel

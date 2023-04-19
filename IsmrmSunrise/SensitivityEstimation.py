@@ -29,7 +29,7 @@ def EstimateCsmMckenzie(im):
 
     channelDim = im.ndim-1
     numChannels = im.shape[channelDim]
-    numElements = im.size / numChannels
+    numElements = im.size // numChannels
 
     imMatrix = np.reshape(im, [numElements, numChannels], order='F')
     scaleCorrection = np.sqrt(np.sum(np.abs(imMatrix)**2,1))
@@ -37,7 +37,7 @@ def EstimateCsmMckenzie(im):
     nonzeroInd = np.nonzero(scaleCorrection)
     nonzeroScaleCorrection = scaleCorrection[nonzeroInd]
     
-    csm = np.zeros(imMatrix.shape, dtype=np.complex)
+    csm = np.zeros(imMatrix.shape, dtype=complex)
     csm[nonzeroInd,:] = imMatrix[nonzeroInd,:] / nonzeroScaleCorrection[:,np.newaxis]
     csm = np.reshape(csm, im.shape, order='F')
     return csm
@@ -125,8 +125,8 @@ def ComputeMatrixSet(correlationLookup, analysisBlockSize, synthesisBlockSize, s
     synthesisBlockSize = np.asarray(synthesisBlockSize)
     synthesisOverlap = np.asarray(synthesisOverlap)
     stepSize = synthesisBlockSize - synthesisOverlap
-    outputShape = tuple((imShape - synthesisBlockSize)/ stepSize + 1) + correlationLookup.shape[2:4]
-    output = np.zeros( outputShape, dtype=np.complex, order='F')
+    outputShape = tuple((imShape - synthesisBlockSize)// stepSize + 1) + correlationLookup.shape[2:4]
+    output = np.zeros( outputShape, dtype=complex, order='F')
     
     
     minIndices = np.array([0,0])
@@ -169,17 +169,17 @@ def ComputeFullCorrelationLookup(im):
         
     Philip J. Beatty (philip.beatty@gmail.com)        
     """
-    import ChannelCombination
+    from . import ChannelCombination
     channelDim = im.ndim-1
     numChannels = im.shape[channelDim]
-    numElements = im.size / numChannels
+    numElements = im.size // numChannels
     
 
     # normalize by root sum of squares magnitude & squish spatial dimensions to 1D
     voxels = ChannelCombination.NormalizeShadingToSoS(im)[0].reshape([numElements, numChannels], order='F')
 
     # compute sample correlation estimates at each pixel location
-    correlationLookup = np.zeros([numElements, numChannels, numChannels], dtype=np.complex, order='F')
+    correlationLookup = np.zeros([numElements, numChannels, numChannels], dtype=complex, order='F')
    
     for channelIndex1 in range(numChannels):
         correlationLookup[:,channelIndex1, channelIndex1] = np.abs(voxels[:,channelIndex1])**2        
@@ -218,7 +218,7 @@ def ComputeDominantEigenvectors(matrixSet, numIterations = 2):
         
     Philip J. Beatty (philip.beatty@gmail.com)    
     """
-    import ChannelCombination
+    from . import ChannelCombination
 
     #
     # Step 1: strip out locations with no signal
@@ -234,7 +234,7 @@ def ComputeDominantEigenvectors(matrixSet, numIterations = 2):
     #
     # Step 2: Use Power Method to compute dominant eigenvector
     #
-    currEigenvector = np.ones([numNonzeroMatrices, matrixSize], dtype = np.complex)
+    currEigenvector = np.ones([numNonzeroMatrices, matrixSize], dtype = complex)
     
     for iterationIndex in range(numIterations):
         # multiply currEigenvector by matrices
@@ -255,7 +255,7 @@ def ComputeDominantEigenvectors(matrixSet, numIterations = 2):
     #
     # Step 4: put back signal locations to corresponding locations
     #    
-    dominantEigenvector = np.zeros([numMatrices, matrixSize], dtype=np.complex)
+    dominantEigenvector = np.zeros([numMatrices, matrixSize], dtype=complex)
     dominantEigenvector[nonzeroIndices,:] = normalizedEigenvector
     
     return dominantEigenvector

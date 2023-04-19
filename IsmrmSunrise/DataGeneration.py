@@ -94,7 +94,7 @@ def ExtractCalData(data, samplingPattern=None, maxReadoutWidth=-1):
 
     kx_cal_bounds = np.arange(np.min(cal_indx), np.max(cal_indx)+1)
     if maxReadoutWidth > 0:
-        kx_cal_bounds = np.arange((samplingPattern.shape[0]-maxReadoutWidth)/2, (samplingPattern.shape[0]+maxReadoutWidth)/2)
+        kx_cal_bounds = np.arange((samplingPattern.shape[0]-maxReadoutWidth)//2, (samplingPattern.shape[0]+maxReadoutWidth)//2)
     
     
     ky_cal_bounds = np.arange(np.min(cal_indy), np.max(cal_indy)+1)

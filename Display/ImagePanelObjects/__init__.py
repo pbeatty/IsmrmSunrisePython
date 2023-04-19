@@ -12,8 +12,6 @@ Philip J. Beatty (philip.beatty@gmail.com)
 2017, modified by Philip Beatty
 """
 
-try:
-    from .Interface import *
-except Exception as err:
-    print("Exception in Display __init__")
-    print("[{}]".format(err))
+from .CrossSections import *
+from .PlotPanel import *
+from .ImagePanel import *

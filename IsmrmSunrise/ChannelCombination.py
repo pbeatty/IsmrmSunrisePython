@@ -38,7 +38,7 @@ def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
     channelDim = channelSensitivityMaps.ndim - 1    
     numChannels = channelSensitivityMaps.shape[channelDim]
     
-    numElements = channelSensitivityMaps.size / numChannels    
+    numElements = channelSensitivityMaps.size // numChannels    
     
     if noiseMatrix is None:
         noiseMatrix = np.eye(numChannels)
@@ -53,7 +53,7 @@ def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
     nonzeroInd = np.nonzero(scaleCorrection)
     nonzeroScaleCorrection = scaleCorrection[nonzeroInd]
 
-    ccm = np.zeros(csmMatrix.shape, dtype=np.complex)
+    ccm = np.zeros(csmMatrix.shape, dtype=complex)
     
     ccm[nonzeroInd, :] = np.array(relativeCcmMatrix[nonzeroInd,:]) / nonzeroScaleCorrection[:, np.newaxis]
 
@@ -125,7 +125,7 @@ def NormalizeShadingToSoS(imIn):
     
     channelDim = imIn.ndim-1
     numChannels = imIn.shape[channelDim]
-    numElements = imIn.size / numChannels
+    numElements = imIn.size // numChannels
     imShape = list(imIn.shape[0:channelDim])
     imShape.append(1)
     

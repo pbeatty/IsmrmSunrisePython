@@ -165,7 +165,7 @@ def ApplyNoiseDecorrelationMatrix(input, decorrelationMatrix, channelDim = None)
     assert decorrelationMatrix.shape[0] == numChannels and decorrelationMatrix.shape[1] == numChannels, "decorrelationMatrix shape should be numChannels x numChannels"
     
     inputShape = input.shape
-    numElements = input.size / numChannels
+    numElements = input.size // numChannels
     
     inputMatrix = np.mat(np.reshape(input, [numElements, numChannels], order='F'))
     outputMatrix = np.mat(decorrelationMatrix) * inputMatrix.T    
@@ -203,10 +203,10 @@ def ComputeNoiseAmplification(unmixing, noiseMatrix=None):
     
     channelDim = unmixing.ndim-1
     numChannels = unmixing.shape[channelDim]
-    numElements = unmixing.size / numChannels
+    numElements = unmixing.size // numChannels
     imShape = unmixing.shape[0:channelDim]
 
-    if noiseMatrix == None:
+    if noiseMatrix is None:
         noiseMatrix = np.eye(numChannels)
     noiseMatrix = np.mat(noiseMatrix)
 

@@ -1,14 +1,14 @@
 
 import numpy as np
 import IsmrmSunrise
-from Display.Viewers import imshow2d
+import Display
 
 # <codecell>
 # Parameters
 noise_scale = 0.05;
 kernel_shape = [5, 7]
 
-print 'Loading Ground Truth Information'
+print('Loading Ground Truth Information')
 
 #Load Image & Sensitivity Maps
 im1 = np.load('im1.npy')
@@ -24,7 +24,7 @@ channel_im = smaps * im1[:,:,np.newaxis]
 
 # <codecell>
 # create accelerated data
-print 'Creating rFOV Accelerated Data'
+print ('Creating rFOV Accelerated Data')
 noise = noise_scale * np.max(im1) * IsmrmSunrise.GenerateCorrelatedNoise(im_shape, Rn)
 
 data = IsmrmSunrise.TransformImageToKspace(channel_im, [0, 1]) + noise
@@ -49,7 +49,7 @@ cal_data = IsmrmSunrise.ExtractCalData(data, sp)
 
 
 # Estimate sensitivitiy maps for channel combination
-print 'Calibration - Estimating Coil Sensitivities'
+print ('Calibration - Estimating Coil Sensitivities')
 
 f = (np.mat(np.hamming(cal_data.shape[0])).T * np.mat(np.hamming(cal_data.shape[1]))).A
 
@@ -68,7 +68,7 @@ ccm_walsh = IsmrmSunrise.ComputeChannelCombinationMaps(csm_walsh)
 
 
 # Create unmixing images
-print 'Calibration - Generate Unmixing Images'
+print('Calibration - Generate Unmixing Images')
 
 jer_lookup_dd = IsmrmSunrise.ComputeJerDataDriven(cal_data, kernel_shape)
 cal_im = IsmrmSunrise.TransformKspaceToImage(cal_data, [0,1], 2 * cal_data.shape)
@@ -76,7 +76,7 @@ jer_lookup_md = IsmrmSunrise.ComputeJerModelDriven(cal_im, kernel_shape)
 
 num_recons = 5
 titles = ['SENSE true csm', 'SENSE walsh csm', 'SENSE mckenzie csm', 'PARS', 'GRAPPA']
-unmix = np.zeros([im_shape[0], im_shape[1], ncoils, num_recons], dtype=np.complex)
+unmix = np.zeros([im_shape[0], im_shape[1], ncoils, num_recons], dtype=complex)
 unmix[:,:,:,0] = IsmrmSunrise.ComputeSenseUnmixing(acc_factor, csm_true, Rn) * acc_factor
 unmix[:,:,:,1] = IsmrmSunrise.ComputeSenseUnmixing(acc_factor, csm_walsh, Rn) * acc_factor
 unmix[:,:,:,2] = IsmrmSunrise.ComputeSenseUnmixing(acc_factor, csm_mckenzie, Rn) * acc_factor
@@ -85,7 +85,7 @@ unmix[:,:,:,4] = IsmrmSunrise.ComputeJerUnmixing(jer_lookup_dd, acc_factor, ccm_
 
 
 # Perform reconstructions
-print 'Perform reconstructions'
+print('Perform reconstructions')
 im_full = np.abs(np.sum(im_full * ccm_mckenzie, 2))
 
 im_hat = np.zeros([im_shape[0], im_shape[1], num_recons])
@@ -98,5 +98,6 @@ for recon_index in range(num_recons):
 
     
 
-imshow2d(im_hat, windowTitle='rFOV image reconstructions', titles=titles)
-imshow2d(im_diff, windowTitle='rFOV image reconstruction diffs', titles=titles)
+Display.ShowImage2D(im_hat, windowTitle='rFOV image reconstructions', titles=titles)
+Display.ShowImage2D(im_diff, windowTitle='rFOV image reconstruction diffs', titles=titles)
+Display.BlockOnOpenWindow()

@@ -13,7 +13,19 @@ Philip J. Beatty (philip.beatty@gmail.com)
 """
 
 try:
-    from .Interface import *
+    from .DisplayCore import *
+    from .Controller import *
+    from .DataModelBase import *
+    from .ShowImageDataModelBase import *
+    
+    darkBackgroundColor = '#31363B'
+    lightTextColor = '#A19F9F'
+
+    class ImageType:
+        mag, phase, real, imag = range(4)
+
+
+
+        
 except Exception as err:
-    print("Exception in Display __init__")
-    print("[{}]".format(err))
+    print("Exception in Common/__init__: {}".format(err))

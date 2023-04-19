@@ -7,10 +7,10 @@ Created on Thu Jun  4 03:10:36 2015
 import numpy as np
 import scipy.io as io
 import IsmrmSunrise
-from Display.Viewers import imshow2d
+import Display
 
 def DisplayPhaseDiff(imOP, imIP, title):
-    imshow2d([imOP, imIP, imOP * np.conj(imIP)], titles=["Out of phase", "In phase", "phase diff"], windowTitle=title)
+    Display.ShowImage2D([imOP, imIP, imOP * np.conj(imIP)], titles=["Out of phase", "In phase", "phase diff"], windowTitle=title)
 
 def GenerateCalImages(calData, imShape):
     lpFilter = (np.mat(np.hamming(calData.shape[0])).T * np.mat(np.hamming(calData.shape[1]))).A
@@ -18,7 +18,7 @@ def GenerateCalImages(calData, imShape):
     return calIm
 
 def ExtractUniformlyAcceleratedData(data, accFactor):
-    dataUniformAccel = np.zeros(data.shape, dtype=np.complex)
+    dataUniformAccel = np.zeros(data.shape, dtype=complex)
     dataUniformAccel[:, 1::accFactor, :] = data[:,1::accFactor, :]
     return dataUniformAccel
 
@@ -49,7 +49,7 @@ uniformAccelDataOOP = ExtractUniformlyAcceleratedData(accelDataOOP, accFactor)
 uniformAccelDataIP = ExtractUniformlyAcceleratedData(accelDataIP, accFactor)
 
 
-print 'Calibration - Compute joint encoding relations'
+print('Calibration - Compute joint encoding relations')
 kernel_shape = [5, 7]
 jerLookupOOP = IsmrmSunrise.ComputeJerDataDriven(calDataOOP, kernel_shape)
 jerLookupIP = IsmrmSunrise.ComputeJerDataDriven(calDataIP, kernel_shape)
@@ -78,6 +78,7 @@ DisplayPhaseDiff(imOOP_DvcOOP, imIP_DvcOOP, "DVC OOP cal")
 DisplayPhaseDiff(imOOP_DvcOOP, imIP_DvcIP, "DVC self cal")
 
 
+Display.BlockOnOpenWindow()
 
 
 

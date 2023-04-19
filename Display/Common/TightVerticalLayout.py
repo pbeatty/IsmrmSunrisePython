@@ -12,8 +12,11 @@ Philip J. Beatty (philip.beatty@gmail.com)
 2017, modified by Philip Beatty
 """
 
-try:
-    from .Interface import *
-except Exception as err:
-    print("Exception in Display __init__")
-    print("[{}]".format(err))
+from qtpy import QtWidgets, QtCore
+
+class TightVerticalLayout(QtWidgets.QVBoxLayout):
+    def __init__(self, parent):
+        super(TightVerticalLayout, self).__init__(parent)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(0)
+       

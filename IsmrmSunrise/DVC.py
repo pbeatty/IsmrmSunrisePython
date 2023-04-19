@@ -1,7 +1,6 @@
 __all__ = ["CreateFourierEncodingImages", "ComputeDvcKernels", "ComputeCcmFromKernels", "ComputeCcmDvc", "GenerateVcBlocks", "FitToAffinePhase", "FitToConstantPhase", "StitchVcBlocks"]
 
 import numpy as np
-from Display.Viewers import imshow2d
 import IsmrmSunrise
 
 
@@ -49,7 +48,7 @@ def CreateFourierEncodingImages(imShape, kernelShape, kernelOversampling):
 
     
     # form Fourier encoding images
-    encodingImages = np.zeros((nx, ny, numCoefficients), dtype= np.complex)
+    encodingImages = np.zeros((nx, ny, numCoefficients), dtype= complex)
     for kyi in range(kernelShape[1]):
         for kxi in range(kernelShape[0]):
             kx = (kxi - xkernelShape_2) / (kernelOversampling[0] * nx)
@@ -250,7 +249,7 @@ def GenerateVcBlocks(im, analysisBlockSize, synthesisBlockSize, synthesisOverlap
     blockEigVecs = np.reshape(IsmrmSunrise.ComputeDominantEigenvectors(matrixSet, 5), nBlocks + matrixSet.shape[2:4], order='F')
     stepSize = synthesisBlockSize - synthesisOverlap
 
-    vcBlocks = np.zeros(tuple(synthesisBlockSize)+nBlocks, dtype=np.complex, order='F')
+    vcBlocks = np.zeros(tuple(synthesisBlockSize)+nBlocks, dtype=complex, order='F')
     for yBlockIndex in range(nBlocks[1]):
         for xBlockIndex in range(nBlocks[0]):
             currLocation = np.array((xBlockIndex, yBlockIndex))
@@ -339,7 +338,7 @@ def FitToConstantPhase(phaseDiff):
     phaseDiff = phaseDiff * np.exp(-1j*anchorPhase)
     avePhase = np.sum(np.angle(phaseDiff) * np.abs(phaseDiff)) / np.sum(np.abs(phaseDiff))    
     
-    phaseCorrection = np.ones(phaseDiff.shape, dtype=np.complex, order='F') * np.exp(-1j*(anchorPhase+avePhase))    
+    phaseCorrection = np.ones(phaseDiff.shape, dtype=complex, order='F') * np.exp(-1j*(anchorPhase+avePhase))    
     return phaseCorrection
 
     
@@ -369,15 +368,16 @@ def StitchVcBlocks(eigBlocks, overlap):
         
     Philip J. Beatty (philip.beatty@gmail.com)    
     """
+    from itertools import chain
     blockSize = np.asarray(eigBlocks.shape[0:2])
     nBlocks = np.asarray(eigBlocks.shape[2:4])
     imShape = nBlocks * blockSize - (nBlocks-1)*overlap
-    im = np.zeros(imShape, dtype=np.complex, order='F')
+    im = np.zeros(imShape, dtype=complex, order='F')
     stepSize = blockSize-overlap
 
 
-    yIndexOrder = range(nBlocks[1])[(nBlocks[1]>>1)::-1] + range(nBlocks[1])[((nBlocks[1]>>1)+1)::]
-    xIndexOrder = range(nBlocks[0])[(nBlocks[0]>>1)::-1] + range(nBlocks[0])[((nBlocks[0]>>1)+1)::]
+    yIndexOrder = chain(range(nBlocks[1])[(nBlocks[1]>>1)::-1], range(nBlocks[1])[((nBlocks[1]>>1)+1)::])
+    xIndexOrder = chain(range(nBlocks[0])[(nBlocks[0]>>1)::-1], range(nBlocks[0])[((nBlocks[0]>>1)+1)::])
 
     firstBlock = True
     for iby in yIndexOrder:
@@ -388,7 +388,6 @@ def StitchVcBlocks(eigBlocks, overlap):
             if firstBlock :
                 newPhase = eigBlocks[:,:,ibx, iby]
                 phaseCorrection = FitToAffinePhase(newPhase)
-                #imshow2d([newPhase, phaseCorrection], block=True)
                 im[start[0]:stop[0], start[1]:stop[1]] = phaseCorrection*newPhase
                 firstBlock = False
             else:
@@ -396,10 +395,6 @@ def StitchVcBlocks(eigBlocks, overlap):
                 newPhase = eigBlocks[:,:,ibx, iby]
                 phaseDiff = newPhase * np.conj(existingPhase)
                 phaseCorrection = FitToAffinePhase(phaseDiff)
-                #imshow2d([existingPhase, newPhase, phaseDiff, phaseCorrection, phaseCorrection*newPhase ])
-
                 im[start[0]:stop[0], start[1]:stop[1]] = phaseCorrection * newPhase
-                #imshow2d(im, windowTitle="block %d, %d"%(ibx, iby), block=True)
-                
     return np.angle(im)
 

@@ -42,11 +42,11 @@ def ComputeGmap(unmixing, ccm, accFactor, noiseMatrix=None):
         
     Philip J. Beatty (philip.beatty@gmail.com)
     """
-    import Noise
+    from . import Noise
     
     channelDim = unmixing.ndim-1
     numChannels = unmixing.shape[channelDim]
-    numElements = unmixing.size / numChannels
+    numElements = unmixing.size // numChannels
     imShape = unmixing.shape[0:channelDim]
   
 
@@ -107,7 +107,7 @@ def ComputeAliasingEnergyMap(pixelMask, trueCsm, unmixing, accFactor):
     aem = np.zeros(imShape)
     
     # Use 'partition' to refer to a portion of the image corresponding to the reduced FOV due to undersampling
-    partitionExtent = imShape[1] / accFactor
+    partitionExtent = imShape[1] // accFactor
     firstPartitionIndices = np.arange(0, partitionExtent)
 
     for aIndex in range(accFactor):
